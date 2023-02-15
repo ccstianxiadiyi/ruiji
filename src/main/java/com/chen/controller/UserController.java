@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Slf4j
@@ -32,6 +33,7 @@ public class UserController {
         if (StringUtils.isNotEmpty(phone)) {
             //生成随机的4位验证码
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
+
             log.info("code={}", code);
 
             //调用阿里云提供的短信服务API完成发送短信
@@ -40,7 +42,7 @@ public class UserController {
             //需要将生成的验证码保存到Session
             session.setAttribute(phone, code);
 
-
+            stringRedisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
             return R.success("手机验证码短信发送成功");
         }
 
@@ -59,7 +61,7 @@ public class UserController {
 
         //从Session中获取保存的验证码
         Object codeInSession = session.getAttribute(phone);
-
+        String s = stringRedisTemplate.opsForValue().get(phone);
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
         if (codeInSession != null && codeInSession.equals(code)) {
             //如果能够比对成功，说明登录成功
@@ -77,6 +79,7 @@ public class UserController {
             }
             session.setAttribute("user", user.getId());
             BaseContext.setCurrentId(user.getId());
+            stringRedisTemplate.delete(phone);
             return R.success(user);
         }
         return R.error("登录失败");
