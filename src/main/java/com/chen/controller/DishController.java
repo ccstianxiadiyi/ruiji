@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -141,6 +142,7 @@ public class DishController {
     }
 
     @GetMapping("/list")
+    @Cacheable(value = "dishCache", key = "#dish.categoryId+'_'+#dish.status")
     public R<List<DishDto>> list(Dish dish) {
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
