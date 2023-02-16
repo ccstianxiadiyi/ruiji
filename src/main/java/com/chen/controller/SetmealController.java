@@ -17,6 +17,7 @@ import com.chen.service.SetmealService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,6 +76,7 @@ public class SetmealController {
     }
 
     @DeleteMapping
+    @CacheEvict(value = "setMealCache", allEntries = true)
     public R<String> deleteDatas(@RequestParam("ids") List<Long> ids) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Setmeal::getId, ids);
@@ -91,6 +93,7 @@ public class SetmealController {
     }
 
     @PostMapping
+    @CacheEvict(value = "setMealCache", allEntries = true)
     public R<String> saveMeal(@RequestBody SetmealDto setmealDto) {
         boolean b = setmealService.saveWithDish(setmealDto);
         if (b) {

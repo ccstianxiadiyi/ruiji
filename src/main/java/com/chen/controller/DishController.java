@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,6 +109,7 @@ public class DishController {
      * 这一块如果菜品删除了，那么对应的套餐里面的菜品也要删除
      * */
     @DeleteMapping
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> deleteByIds(@RequestParam("ids") List ids) {
 
         boolean b = dishService.removeByIds(ids);
@@ -133,6 +135,7 @@ public class DishController {
     }
 
     @PutMapping
+    @CacheEvict(value = "dishCache", allEntries = true)
     public R<String> editData(@RequestBody DishDto dishDto) {
         boolean b = dishService.editWithFlavor(dishDto);
         if (b) {
